@@ -10,6 +10,14 @@ program
   .parse(process.argv);
 
 
-// Program Start:
+// Prepare Arguments:
 
-console.log(`Cleaning '${program.output}'...`);
+const outputPath = program.output;
+
+if (!outputPath || typeof outputPath !== "string") {
+  console.error("Error: No output path was specified.");
+  process.exit(1);
+}
+
+
+console.log(`Cleaning '${outputPath}'...`);

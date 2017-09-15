@@ -11,6 +11,20 @@ program
   .parse(process.argv);
 
 
-// Program Start:
+// Prepare Arguments:
 
-console.log(`Building '${program.input}' to '${program.output}'...`);
+const inputPath = program.input;
+const outputPath = program.output;
+
+if (!inputPath || typeof inputPath !== "string") {
+  console.error("Error: No input path was specified.");
+  process.exit(1);
+}
+
+if (!outputPath || typeof outputPath !== "string") {
+  console.error("Error: No output path was specified.");
+  process.exit(1);
+}
+
+
+console.log(`Building '${inputPath}' to '${outputPath}'...`);
