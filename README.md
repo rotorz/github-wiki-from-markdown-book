@@ -11,15 +11,27 @@ $ npm install --save-dev github-wiki-from-markdown-book
 ```
 
 
-## Usage
+## Usage - build command
 
 ```sh
-$ github-wiki-from-markdown-book --source=markdown-book.yaml --output=./wiki
+$ github-wiki-from-markdown-book build --source=markdown-book.yaml --output=./wiki
 ```
 
 | Argument       | Description                                                           |
 |----------------|:----------------------------------------------------------------------|
-| `--source`     | Path to the YAML data file that composes the markdown book.           |
+| `--input`      | Path to the YAML input file that composes the markdown book.          |
+| `--output`     | Output path for generated Github wiki pages.                          |
+| `--help`       | Shows usage information.                                              |
+
+
+## Usage - clean command
+
+```sh
+$ github-wiki-from-markdown-book clean --output=./wiki
+```
+
+| Argument       | Description                                                           |
+|----------------|:----------------------------------------------------------------------|
 | `--output`     | Output path for generated Github wiki pages.                          |
 | `--help`       | Shows usage information.                                              |
 
