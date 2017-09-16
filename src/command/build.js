@@ -3,7 +3,10 @@
 
 "use strict";
 
+
 const program = require("commander");
+
+const BookBuilder = require("../BookBuilder");
 
 
 program
@@ -14,18 +17,16 @@ program
 
 // Prepare Arguments:
 
-const inputPath = program.input;
-const outputPath = program.output;
-
-if (!inputPath || typeof inputPath !== "string") {
-  console.error("Error: No input path was specified.");
-  process.exit(1);
+if (!program.input || typeof program.input !== "string") {
+  fatalError("No input path was specified.");
 }
 
-if (!outputPath || typeof outputPath !== "string") {
-  console.error("Error: No output path was specified.");
-  process.exit(1);
+if (!program.output || typeof program.output !== "string") {
+  fatalError("No output path was specified.");
 }
 
 
-console.log(`Building '${inputPath}' to '${outputPath}'...`);
+let bookBuilder = BookBuilder.createFromYamlFile(program.input);
+
+console.log(`Building "${bookBuilder.meta.title}" by ${bookBuilder.meta.author} to '${program.output}'...`);
+bookBuilder.build(program.output);
