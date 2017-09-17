@@ -5,8 +5,7 @@
 
 
 const MarkdownIt = require("markdown-it");
-const fs = require("fs");
-const mkdirp = require("mkdirp");
+const fs = require("fs-extra");
 const path = require("path");
 const url = require("url");
 const yaml = require("js-yaml");
@@ -204,7 +203,7 @@ class BookBuilder {
       "[[$3|$1]]"
     );
 
-    // Fix reference-style links by resolving them into absolute URLs.
+    // Github wiki doesn't support '.md' file extension in relative links.
     raw = raw.replace(
       /^(\[[^\]]*\]:)\s*(\.\/.+?)\.md\s*$/gm,
       "$1 $2"
@@ -227,6 +226,8 @@ class BookBuilder {
 
 
   generateOutputFiles(outputPath) {
+    this.generateAssetDirectories(outputPath);
+
     for (let [source, content] of this.topicContent) {
       this.generateTopicOutputFile(source, content, outputPath);
     }
@@ -241,6 +242,29 @@ class BookBuilder {
       let sidebarLayourPath = path.resolve(this.bookDir, this.meta.sidebarLayout);
       let sidebarLayoutText = fs.readFileSync(sidebarLayourPath, "utf8");
       this.generateSidebarOutputFile(sidebarLayoutText, path.join(outputPath, "_Sidebar.md"));
+    }
+  }
+
+
+  generateAssetDirectories(outputPath) {
+    if (!Array.isArray(this.meta.assetDirectoryNames)) {
+      return;
+    }
+
+    console.log("Copying asset directories...");
+
+    for (let assetDirectoryName of this.meta.assetDirectoryNames) {
+      let sourceAssetDirectoryPath = path.resolve(this.bookDir, assetDirectoryName);
+      let outputAssetDirectoryPath = path.resolve(outputPath, assetDirectoryName);
+
+      if (path.basename(sourceAssetDirectoryPath) !== assetDirectoryName) {
+        fatalError(`Invalid asset directory name '${assetDirectoryName}'.`);
+      }
+
+      console.log("  " + outputAssetDirectoryPath);
+
+      fs.removeSync(outputAssetDirectoryPath);
+      fs.copySync(sourceAssetDirectoryPath, outputAssetDirectoryPath);
     }
   }
 
@@ -316,7 +340,7 @@ class BookBuilder {
         + "\n"
         + sourceReference;
 
-    mkdirp.sync(path.dirname(generatedPath));
+    fs.ensureDirSync(path.dirname(generatedPath));
     fs.writeFileSync(generatedPath, generatedContent, "utf8");
   }
 

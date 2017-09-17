@@ -18,10 +18,10 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^2.11.0",
+    "fs-extra": "^4.0.2",
     "glob": "^7.1.2",
     "js-yaml": "^3.10.0",
-    "markdown-it": "^8.4.0",
-    "mkdirp": "^0.5.1"
+    "markdown-it": "^8.4.0"
   },
   "devDependencies": {
     "mocha": "^3.5.3",
