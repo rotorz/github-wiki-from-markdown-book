@@ -65,7 +65,7 @@ class BookBuilder {
     this.prepareReferenceMap();
     this.prepareLinearNavigation();
     this.readTopicContentFiles();
-    this.generateFullToc();
+    this.generateTocListing();
     this.generateOutputFiles(outputPath);
   }
 
@@ -227,22 +227,8 @@ class BookBuilder {
 
   generateOutputFiles(outputPath) {
     this.generateAssetDirectories(outputPath);
-
-    for (let [source, content] of this.topicContent) {
-      this.generateTopicOutputFile(source, content, outputPath);
-    }
-
-    if (typeof this.meta.footerLayout === "string") {
-      let footerLayourPath = path.resolve(this.bookDir, this.meta.footerLayout);
-      let footerLayoutText = fs.readFileSync(footerLayourPath, "utf8");
-      this.generateFooterOutputFile(footerLayoutText, path.join(outputPath, "_Footer.md"));
-    }
-
-    if (typeof this.meta.sidebarLayout === "string") {
-      let sidebarLayourPath = path.resolve(this.bookDir, this.meta.sidebarLayout);
-      let sidebarLayoutText = fs.readFileSync(sidebarLayourPath, "utf8");
-      this.generateSidebarOutputFile(sidebarLayoutText, path.join(outputPath, "_Sidebar.md"));
-    }
+    this.generateSpecialOutputFiles(outputPath);
+    this.generateTopicOutputFiles(outputPath);
   }
 
 
@@ -265,6 +251,27 @@ class BookBuilder {
 
       fs.removeSync(outputAssetDirectoryPath);
       fs.copySync(sourceAssetDirectoryPath, outputAssetDirectoryPath);
+    }
+  }
+
+  generateSpecialOutputFiles(outputPath) {
+    console.log("Generating special output files...");
+
+    for (let specialEntry of this.meta.special) {
+      let specialSourcePath = path.resolve(this.bookDir, specialEntry.source);
+      let specialRelativePath = this.normalizePathRelativeToBook(specialSourcePath);
+      let specialOutputPath = path.resolve(outputPath, path.basename(specialRelativePath));
+
+      let specialSourceText = fs.readFileSync(specialSourcePath, "utf8");
+      this.generateSpecialOutput(specialSourceText, specialOutputPath);
+    }
+  }
+
+  generateTopicOutputFiles(outputPath) {
+    console.log("Generating topic output files...");
+
+    for (let [source, content] of this.topicContent) {
+      this.generateTopicOutputFile(source, content, outputPath);
     }
   }
 
@@ -333,7 +340,7 @@ class BookBuilder {
 
     let generatedContent = constants.GENERATED_OUTPUT_COMMENT + "\n\n"
         + breadcrumbs
-        + content.text.replace("{{FULL_TOC}}", this.fullToc)
+        + this.substitutePlaceholders(content.text)
         + pagination
         + relatedTopicsListing
         + childTopicsListing
@@ -362,21 +369,30 @@ class BookBuilder {
   }
 
 
-  generateFooterOutputFile(footerLayoutText, footerOutputPath) {
-    fs.writeFileSync(footerOutputPath, footerLayoutText, "utf8");
+  generateSpecialOutput(sourceText, outputPath) {
+    let outputText = this.substitutePlaceholders(sourceText);
+
+    fs.ensureDirSync(path.dirname(outputPath));
+    fs.writeFileSync(outputPath, outputText, "utf8");
   }
 
 
-  generateSidebarOutputFile(sidebarLayoutText, sidebarOutputPath) {
-    let toc = this.generateTocListing("", this.tocRoot.topics, this.meta.tocDepth - 1);
-    let sidebarOutput = sidebarLayoutText.replace("{{TOC}}", toc);
-    fs.writeFileSync(sidebarOutputPath, sidebarOutput, "utf8");
+  substitutePlaceholders(markdownText) {
+    let wikiMarkdown = markdownText;
+
+    // Substitute {{TOC}} and {{FULL_TOC}}.
+    wikiMarkdown = wikiMarkdown
+      .replace("{{FULL_TOC}}", this.fullTocListing)
+      .replace("{{TOC}}", this.tocListing);
+
+    return wikiMarkdown;
   }
 
 
 
-  generateFullToc() {
-    this.fullToc = this.generateTocListing("", this.tocRoot.topics, 999999);
+  generateTocListing() {
+    this.fullTocListing = this._generateTocListingHelper("", this.tocRoot.topics, 999999);
+    this.tocListing = this._generateTocListingHelper("", this.tocRoot.topics, this.meta.tocDepth - 1);
   }
 
   get tocRoot() {
@@ -389,7 +405,7 @@ class BookBuilder {
     return root;
   }
 
-  generateTocListing(padding, topics, maximumDepth) {
+  _generateTocListingHelper(padding, topics, maximumDepth) {
     let output = "";
     let innerPadding = padding + "  ";
 
@@ -403,7 +419,7 @@ class BookBuilder {
 
       if (topic.tocExcludeChildren !== true) {
         if (maximumDepth > 0 && Array.isArray(topic.topics)) {
-          output += this.generateTocListing(innerPadding, topic.topics, maximumDepth - 1);
+          output += this._generateTocListingHelper(innerPadding, topic.topics, maximumDepth - 1);
         }
       }
     }

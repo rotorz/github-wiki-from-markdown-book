@@ -3,6 +3,10 @@
 Loads and collates markdown topic files using a YAML encoded book that organizes the
 topics into a book. This is sort of like a highly watered down version of DITA.
 
+>
+> **Important** - Implementation is currently rough and there are no unit tests yet.
+>
+
 
 ## Installation
 
@@ -39,30 +43,61 @@ $ github-wiki-from-markdown-book clean --output=./wiki
 ## Example book.yaml
 
 ```yaml
-title: User Guide for Barry's Useful Toolkit
-author: Barry Jones
+title: Example Book
+author: Joe Bloggs
 
+
+# Base URL for 'source' links in generated output.
+# Note: Source links are not generated if this is not specified.
+sourceBaseUrl: https://github.com/rotorz/github-wiki-from-markdown-book/blob/master/example-book/
+
+# Relative path to topic that will be used as root node of generated TOC.
+tocRootTopic: ./topics/Home.md
+# Maximum depth for generated TOC.
+tocDepth: 2
+
+
+# List of asset directory names (these are copied to generated output).
+assetDirectoryNames:
+  - img
+
+
+# List of special files - these get processed but are not treated as topics.
+special:
+  - source: ./special/_Footer.md
+  - source: ./special/_Sidebar.md
+
+
+# List of topics.
 topics:
-  - source: ./getting-started.md
+  # Chapter: Getting Started
+  - source: ./topics/Getting-Started.md
     topics:
-      - source: ./introduction.md
-      - source: ./installation.md
-      - source: ./software-updates.md
-  - source: ./user-interface.md
-    topics:
-      - source: ./main-window.md
-        topics:
-          - source: ./toolbar.md
-          - source: ./status-panel.md
-          - source: ./viewports.md
-      - source: ./create-viewport.md
+      # Sub-topic
+      - source: ./topics/Introduction.md
+      - source: ./topics/Installation.md
+      - source: ./topics/Software-Updates.md
 
-references:
-  - type: normal
+  # Chapter: User Interface
+  - source: ./topics/User-Interface.md
+    topics:
+      # Sub-topics
+      - source: ./topics/Main-Window.md
+        topics:
+          # Going deeper! sub-topics of "Main Window".
+          - source: ./topics/Toolbar.md
+          - source: ./topics/Status-Panel.md
+          - source: ./topics/Viewports.md
+      - source: ./topics/Create-Viewport.md
+
+
+# Associates topics with one another to produce 'Related Topics' listings.
+referenceTable:
+  - type: sourceonly
     sources:
-      - ./viewports.md
+      - ./topics/Viewports.md
     targets:
-      - ./create-viewport.md
+      - ./topics/Create-Viewport.md
 ```
 
 
