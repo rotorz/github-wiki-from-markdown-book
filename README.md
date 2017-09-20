@@ -4,7 +4,7 @@ Loads and collates markdown topic files using a YAML encoded book that organizes
 topics into a book. This is sort of like a highly watered down version of DITA.
 
 >
-> **Important** - Implementation is currently rough and there are no unit tests yet.
+> **Important** - There are no unit tests yet.
 >
 
 
@@ -36,6 +36,7 @@ $ github-wiki-from-markdown-book clean --output=./wiki
 
 | Argument       | Description                                                           |
 |----------------|:----------------------------------------------------------------------|
+| `--input`      | Path to the YAML input file that composes the markdown book.          |
 | `--output`     | Output path for generated Github wiki pages.                          |
 | `--help`       | Shows usage information.                                              |
 

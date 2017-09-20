@@ -6,7 +6,8 @@
 
 const program = require("commander");
 
-const BookBuilder = require("../BookBuilder");
+const build = require("../behaviors/build");
+const loadBookFromYamlFile = require("../behaviors/loadBookFromYamlFile");
 
 
 program
@@ -18,15 +19,15 @@ program
 // Prepare Arguments:
 
 if (!program.input || typeof program.input !== "string") {
-  fatalError("No input path was specified.");
+  throw new Error("No input path was specified.");
 }
 
 if (!program.output || typeof program.output !== "string") {
-  fatalError("No output path was specified.");
+  throw new Error("No output path was specified.");
 }
 
 
-let bookBuilder = BookBuilder.createFromYamlFile(program.input);
+let book = loadBookFromYamlFile(program.input);
 
-console.log(`Building "${bookBuilder.meta.title}" by ${bookBuilder.meta.author} to '${program.output}'...`);
-bookBuilder.build(program.output);
+console.log(`Building "${book.meta.title}" by ${book.meta.author} to '${program.output}'...`);
+build(book, program.output);

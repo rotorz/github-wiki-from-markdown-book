@@ -4,50 +4,33 @@
 "use strict";
 
 
-const fs = require("fs");
-const glob = require("glob");
-const path = require("path");
 const program = require("commander");
 
-const constants = require("../constants");
+const cleanOutputAssetDirectories = require("../behaviors/cleanOutputAssetDirectories");
+const cleanOutputGeneratedTopics = require("../behaviors/cleanOutputGeneratedTopics");
+const loadBookFromYamlFile = require("../behaviors/loadBookFromYamlFile");
 
 
 program
+  .option("-i, --input <path>", "Path to the YAML data file that composes the markdown book.")
   .option("-o, --output <path>", "Output path for generated Github wiki pages.")
   .parse(process.argv);
 
 
 // Prepare Arguments:
 
-const outputPath = program.output;
+if (!program.input || typeof program.input !== "string") {
+  throw new Error("No input path was specified.");
+}
 
-if (!outputPath || typeof outputPath !== "string") {
-  console.error("Error: No output path was specified.");
-  process.exit(1);
+if (!program.output || typeof program.output !== "string") {
+  throw new Error("No output path was specified.");
 }
 
 
-console.log(`Cleaning '${outputPath}'...`);
+let book = loadBookFromYamlFile(program.input);
 
 
-// Get list of all markdown files in output path.
-const generatedFilePaths = glob.sync(path.join(outputPath, "**/*.md"));
-
-// Track directories that contained removed files.
-const cleanedDirectories = new Set();
-
-// Delete all markdown files that contain the generated output comment.
-for (let filePath of generatedFilePaths) {
-  let content = fs.readFileSync(filePath, "utf8");
-  if (content.startsWith(constants.GENERATED_OUTPUT_COMMENT)) {
-    console.log(`  Removing '${filePath}'...`);
-    fs.unlinkSync(filePath);
-    cleanedDirectories.add(path.dirname(filePath));
-  }
-}
-
-
-//!TODO: Perhaps remove empty directories (see `cleanedDirectories`).
-//for (let directoryPath of Array.from(cleanedDirectories).sort().reverse()) {
-//  console.log(directoryPath);
-//}
+console.log(`Cleaning '${program.output}'...`);
+cleanOutputAssetDirectories(book, program.output);
+cleanOutputGeneratedTopics(book, program.output);
