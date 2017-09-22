@@ -1,6 +1,6 @@
 {
   "name": "github-wiki-from-markdown-book",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Generates Github wiki from a book of markdown topics.",
   "main": "src/index.js",
   "bin": {
